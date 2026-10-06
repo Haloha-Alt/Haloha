@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="tokyo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沈志文 · 精神避难所</title>
+<meta name="description" content="沈志文的精神避难所 —— 一个信息与计算科学学生的哲学、名著与深夜胡思乱想集合地。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<style>
+/* ============================================================
+   主题变量
+   ============================================================ */
+:root{
+  --radius: 16px;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+
+html[data-theme="tokyo"]{
+  --bg:#1a1b26; --bg2:#16161e; --text:#c0caf5; --muted:#565f89;
+  --accent:#e0af68; --accent2:#7aa2f7; --accent3:#bb9af7;
+  --card:#24283b; --card2:#1f2335; --border:rgba(122,162,247,.18);
+  --shadow:rgba(0,0,0,.45); --star:192,202,245; --name:#ffffff;
+}
+html[data-theme="cyber"]{
+  --bg:#120f1d; --bg2:#0d0a16; --text:#d7d0f5; --muted:#6b5f96;
+  --accent:#f7c948; --accent2:#bb9af7; --accent3:#ff79c6;
+  --card:#1c1630; --card2:#170f28; --border:rgba(187,154,247,.25);
+  --shadow:rgba(0,0,0,.55); --star:215,208,245; --name:#ffffff;
+}
+html[data-theme="forest"]{
+  --bg:#101613; --bg2:#0b100d; --text:#cfe3d6; --muted:#5d7a68;
+  --accent:#9ece6a; --accent2:#5fd3c4; --accent3:#e0af68;
+  --card:#18231d; --card2:#131c17; --border:rgba(158,206,106,.2);
+  --shadow:rgba(0,0,0,.5); --star:207,227,214; --name:#f2fff7;
+}
+html[data-theme="daylight"]{
+  --bg:#f6f3ec; --bg2:#efeae0; --text:#3a3b47; --muted:#8b8878;
+  --accent:#c07a2b; --accent2:#3b6ea5; --accent3:#8a5fbf;
+  --card:#ffffff; --card2:#fbf8f2; --border:rgba(59,110,165,.18);
+  --shadow:rgba(120,110,90,.16); --star:150,140,120; --name:#22232c;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{scroll-behavior:smooth;scroll-padding-top:90px;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter','Helvetica Neue',Helvetica,'PingFang SC','Microsoft YaHei',Arial,sans-serif;
+  line-height:1.75;
+  overflow-x:hidden;
+  transition:background .6s var(--ease), color .6s var(--ease);
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--accent);color:var(--bg);}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{
+  background:linear-gradient(var(--accent),var(--accent2));
+  border-radius:99px;border:2px solid var(--bg2);
+}
+
+/* ============================================================
+   背景层：极光 + 粒子 + 鼠标光晕
+   ============================================================ */
+#stars{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+}
+.aurora{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  opacity:.55;
+}
+.aurora span{
+  position:absolute;border-radius:50%;filter:blur(90px);
+  animation:drift 22s ease-in-out infinite alternate;
+}
+.aurora span:nth-child(1){
+  width:46vw;height:46vw;background:var(--accent2);
+  top:-14vw;left:-10vw;opacity:.20;
+}
+.aurora span:nth-child(2){
+  width:38vw;height:38vw;background:var(--accent);
+  top:38vh;right:-12vw;opacity:.16;animation-duration:28s;animation-delay:-6s;
+}
+.aurora span:nth-child(3){
+  width:42vw;height:42vw;background:var(--accent3);
+  bottom:-16vw;left:22vw;opacity:.14;animation-duration:32s;animation-delay:-14s;
+}
+@keyframes drift{
+  0%{transform:translate3d(0,0,0) scale(1);}
+  50%{transform:translate3d(4vw,-3vh,0) scale(1.12);}
+  100%{transform:translate3d(-3vw,4vh,0) scale(.95);}
+}
+
+.cursor-glow{
+  position:fixed;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--accent2) 22%, transparent) 0%, transparent 68%);
+  transform:translate(-50%,-50%);z-index:1;pointer-events:none;
+  transition:opacity .4s ease;opacity:0;mix-blend-mode:screen;
+}
+html[data-theme="daylight"] .cursor-glow{mix-blend-mode:multiply;}
+
+/* ============================================================
+   加载动画
+   ============================================================ */
+#loader{
+  position:fixed;inset:0;z-index:9999;background:var(--bg2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  transition:opacity .7s ease, visibility .7s ease;
+}
+#loader.done{opacity:0;visibility:hidden;}
+.loader-mark{
+  font-size:1.5rem;letter-spacing:.5em;color:var(--name);
+  animation:markIn .9s var(--ease) both;
+}
+.loader-bar{
+  width:190px;height:2px;background:var(--border);border-radius:99px;overflow:hidden;
+}
+.loader-bar i{
+  display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  animation:loadFill 1.5s var(--ease) forwards;
+}
+@keyframes markIn{from{opacity:0;filter:blur(10px);transform:translateY(10px);}to{opacity:1;filter:blur(0);transform:none;}}
+@keyframes loadFill{to{width:100%;}}
+
+/* 顶部滚动进度 */
+.progress{
+  position:fixed;top:0;left:0;height:3px;width:0;z-index:1200;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
+  box-shadow:0 0 12px var(--accent2);
+}
+
+/* ============================================================
+   导航
+   ============================================================ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1100;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px clamp(16px,4vw,42px);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:color-mix(in srgb, var(--bg) 72%, transparent);
+  border-bottom:1px solid transparent;
+  transition:border-color .4s ease, padding .4s ease, background .4s ease;
+}
+nav.scrolled{
+  border-bottom-color:var(--border);
+  padding-top:10px;padding-bottom:10px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+}
+.nav-logo{
+  font-weight:700;letter-spacing:.12em;color:var(--name);white-space:nowrap;
+  font-size:1rem;display:flex;align-items:center;gap:9px;
+}
+.nav-logo i{
+  width:9px;height:9px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 10px var(--accent);animation:blip 2.4s ease-in-out infinite;
+}
+@keyframes blip{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.7);}}
+
+.nav-links{display:flex;gap:4px;flex-wrap:wrap;}
+.nav-links a{
+  position:relative;color:var(--muted);text-decoration:none;font-size:.88rem;
+  padding:6px 12px;border-radius:99px;transition:color .3s ease, background .3s ease;
+}
+.nav-links a:hover{color:var(--text);background:color-mix(in srgb, var(--accent2) 12%, transparent);}
+.nav-links a.active{color:var(--accent);}
+.nav-links a.active::after{
+  content:'';position:absolute;left:12px;right:12px;bottom:2px;height:1.5px;
+  background:var(--accent);border-radius:2px;
+  animation:lineIn .4s var(--ease);
+}
+@keyframes lineIn{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+
+.themes{display:flex;gap:7px;}
+.themes button{
+  width:19px;height:19px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;padding:0;
+  transition:transform .3s var(--ease), border-color .3s ease;
+}
+.themes button:hover{transform:scale(1.22);}
+.themes button.active{border-color:var(--text);}
+.themes button[data-theme="tokyo"]{background:linear-gradient(135deg,#e0af68,#7aa2f7);}
+.themes button[data-theme="cyber"]{background:linear-gradient(135deg,#f7c948,#bb9af7);}
+.themes button[data-theme="forest"]{background:linear-gradient(135deg,#9ece6a,#5fd3c4);}
+.themes button[data-theme="daylight"]{background:linear-gradient(135deg,#c07a2b,#3b6ea5);}
+
+/* ============================================================
+   布局
+   ============================================================ */
+main,header,footer{position:relative;z-index:5;}
+.wrap{max-width:860px;margin:0 auto;padding:0 clamp(18px,4vw,26px);}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+header.hero{
+  min-height:100svh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:110px 20px 60px;position:relative;
+}
+.avatar-box{
+  position:relative;width:148px;height:148px;margin-bottom:30px;
+  animation:floatY 6s ease-in-out infinite;
+}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-13px);}}
+
+.avatar-ring{
+  position:absolute;inset:-11px;border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0%, var(--accent) 22%, transparent 46%, var(--accent2) 72%, transparent 100%);
+  animation:spin 7s linear infinite;filter:blur(3px);opacity:.9;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.avatar-halo{
+  position:absolute;inset:-26px;border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--accent2) 34%, transparent), transparent 70%);
+  animation:halo 4s ease-in-out infinite;
+}
+@keyframes halo{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:.95;transform:scale(1.1);}}
+
+.avatar{
+  position:relative;width:148px;height:148px;border-radius:50%;
+  object-fit:cover;display:block;
+  border:3px solid var(--card);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:0 16px 46px var(--shadow);
+  transition:transform .6s var(--ease), filter .6s ease;
+}
+.avatar-box:hover .avatar{transform:scale(1.06) rotate(-3deg);filter:saturate(1.15);}
+/* 头像加载失败时的兜底：显示姓氏 */
+.avatar-fallback{
+  position:relative;width:148px;height:148px;border-radius:50%;
+  display:none;align-items:center;justify-content:center;
+  font-size:3.4rem;font-weight:700;color:#14161f;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:3px solid var(--card);box-shadow:0 16px 46px var(--shadow);
+}
+
+h1{
+  font-size:clamp(2.1rem,6.5vw,3.3rem);font-weight:800;letter-spacing:.16em;
+  margin-bottom:14px;color:var(--name);position:relative;
+  background:linear-gradient(100deg,var(--name) 20%,var(--accent) 42%,var(--accent2) 58%,var(--name) 80%);
+  background-size:250% 100%;-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shimmer 7s linear infinite;
+}
+@keyframes shimmer{to{background-position:-250% 0;}}
+
+.subtitle{
+  color:var(--muted);font-style:italic;font-size:clamp(.92rem,2.6vw,1.06rem);
+  min-height:1.9em;
+}
+.caret{
+  display:inline-block;width:2px;height:1em;background:var(--accent);
+  vertical-align:-2px;margin-left:3px;animation:blink 1s step-end infinite;
+}
+@keyframes blink{50%{opacity:0;}}
+
+.hero-tags{
+  display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:26px;
+}
+.hero-tags span{
+  font-size:.76rem;letter-spacing:.08em;color:var(--muted);
+  border:1px solid var(--border);border-radius:99px;padding:5px 14px;
+  background:color-mix(in srgb, var(--card) 60%, transparent);
+  transition:all .35s var(--ease);
+}
+.hero-tags span:hover{
+  color:var(--bg);background:var(--accent);border-color:var(--accent);
+  transform:translateY(-3px);box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.scroll-hint{
+  position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:var(--muted);font-size:.7rem;letter-spacing:.28em;text-decoration:none;
+  animation:floatY 3.4s ease-in-out infinite;
+}
+.scroll-hint .mouse{
+  width:22px;height:35px;border:1.6px solid var(--muted);border-radius:99px;position:relative;
+}
+.scroll-hint .mouse::after{
+  content:'';position:absolute;left:50%;top:7px;width:3px;height:7px;border-radius:2px;
+  background:var(--accent);transform:translateX(-50%);
+  animation:wheel 1.7s ease-in-out infinite;
+}
+@keyframes wheel{0%{opacity:0;transform:translate(-50%,0);}30%{opacity:1;}100%{opacity:0;transform:translate(-50%,12px);}}
+
+/* ============================================================
+   区块
+   ============================================================ */
+section{
+  background:color-mix(in srgb, var(--card) 88%, transparent);
+  border:1px solid var(--border);
+  padding:clamp(22px,4vw,34px);
+  border-radius:var(--radius);
+  box-shadow:0 18px 44px -22px var(--shadow);
+  margin-bottom:30px;
+  position:relative;overflow:hidden;
+  transition:transform .5s var(--ease), border-color .5s ease, background .6s var(--ease);
+}
+section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--accent2) 60%, transparent),transparent);
+  opacity:0;transition:opacity .5s ease;
+}
+section:hover{transform:translateY(-4px);border-color:color-mix(in srgb, var(--accent2) 42%, transparent);}
+section:hover::before{opacity:1;}
+
+h2{
+  color:var(--accent);font-size:clamp(1.15rem,3.4vw,1.42rem);
+  margin-bottom:18px;border-left:4px solid var(--accent2);
+  padding-left:12px;line-height:1.4;
+  display:flex;align-items:center;gap:10px;
+}
+h2 .no{
+  font-size:.68em;color:var(--muted);font-weight:400;letter-spacing:.16em;
+  border:1px solid var(--border);border-radius:99px;padding:1px 9px;
+}
+p{margin-bottom:10px;}
+
+/* 滚动显现 */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .85s var(--ease), transform .85s var(--ease);}
+.reveal.in{opacity:1;transform:none;}
+
+/* ============================================================
+   关于我
+   ============================================================ */
+.profile-list{list-style:none;}
+.profile-list li{
+  margin-bottom:10px;padding:9px 12px;border-radius:10px;
+  border-left:2px solid transparent;
+  transition:background .35s ease, border-color .35s ease, transform .35s var(--ease);
+}
+.profile-list li:hover{
+  background:color-mix(in srgb, var(--accent2) 9%, transparent);
+  border-left-color:var(--accent2);transform:translateX(6px);
+}
+.profile-list strong{
+  color:var(--accent2);display:inline-block;width:104px;
+  font-weight:600;letter-spacing:.04em;
+}
+@media (max-width:520px){
+  .profile-list strong{display:block;width:auto;}
+}
+
+/* 数字统计 */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px;
+}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}}
+.stat{
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;
+  padding:16px 10px;text-align:center;
+  transition:transform .4s var(--ease), border-color .4s ease;
+}
+.stat:hover{transform:translateY(-5px) scale(1.03);border-color:var(--accent);}
+.stat .num{
+  font-size:1.65rem;font-weight:800;color:var(--accent);letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;display:block;line-height:1.2;
+}
+.stat .lbl{font-size:.72rem;color:var(--muted);letter-spacing:.1em;}
+
+/* ============================================================
+   精神状态仪表盘
+   ============================================================ */
+.meters{display:flex;flex-direction:column;gap:15px;}
+.meter .top{
+  display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px;
+}
+.meter .top b{font-weight:600;color:var(--text);}
+.meter .top em{font-style:normal;color:var(--accent);font-variant-numeric:tabular-nums;}
+.track{
+  height:9px;border-radius:99px;overflow:hidden;position:relative;
+  background:color-mix(in srgb, var(--muted) 22%, transparent);
+}
+.track i{
+  display:block;height:100%;width:0;border-radius:99px;position:relative;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  transition:width 1.5s var(--ease);
+  box-shadow:0 0 14px color-mix(in srgb, var(--accent2) 45%, transparent);
+}
+.track i::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  animation:sweep 2.4s ease-in-out infinite;
+}
+@keyframes sweep{0%{transform:translateX(-100%);}60%,100%{transform:translateX(100%);}}
+.meter-note{
+  margin-top:20px;font-size:.85rem;color:var(--muted);font-style:italic;
+  border-top:1px dashed var(--border);padding-top:16px;
+}
+
+/* ============================================================
+   哲学史时间轴
+   ============================================================ */
+.timeline{position:relative;padding-left:34px;margin-top:6px;}
+.timeline .rail{
+  position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+  background:var(--border);border-radius:2px;overflow:hidden;
+}
+.timeline .rail i{
+  display:block;width:100%;height:0;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
+  box-shadow:0 0 12px var(--accent2);
+  transition:height .2s linear;
+}
+.tl-item{position:relative;padding-bottom:24px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item::before{
+  content:'';position:absolute;left:-31px;top:25px;
+  width:11px;height:11px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--muted);
+  transition:all .45s var(--ease);
+}
+.tl-item:hover::before{
+  border-color:var(--accent);background:var(--accent);
+  box-shadow:0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent);
+  transform:scale(1.2);
+}
+.tl-card{
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;
+  padding:15px 18px;cursor:pointer;
+  transition:transform .45s var(--ease), border-color .45s ease, box-shadow .45s ease;
+}
+.tl-card:hover{
+  transform:translateX(7px);border-color:var(--accent);
+  box-shadow:-6px 10px 30px -16px var(--shadow);
+}
+.tl-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.tl-head b{color:var(--name);font-size:1.03rem;letter-spacing:.03em;}
+.tl-head span{font-size:.74rem;color:var(--muted);letter-spacing:.08em;}
+.tl-card .say{
+  margin-top:8px;font-size:.92rem;color:var(--accent);
+  border-left:2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  padding-left:10px;
+}
+.tl-card .trans{
+  margin-top:9px;font-size:.86rem;color:var(--muted);
+  max-height:0;overflow:hidden;transition:max-height .5s var(--ease), margin-top .5s ease;
+}
+.tl-card.open .trans{max-height:220px;margin-top:9px;}
+.tl-card .hintline{
+  margin-top:8px;font-size:.7rem;color:var(--muted);opacity:.75;letter-spacing:.08em;
+}
+.tl-card.open .hintline{opacity:0;max-height:0;margin:0;overflow:hidden;}
+
+/* ============================================================
+   语录生成器
+   ============================================================ */
+.quote-box{
+  background:color-mix(in srgb, var(--accent) 10%, transparent);
+  border-left:4px solid var(--accent);
+  padding:15px 18px;border-radius:0 10px 10px 0;margin-bottom:12px;
+  transition:transform .4s var(--ease), background .4s ease;
+}
+.quote-box:hover{
+  transform:translateX(6px);
+  background:color-mix(in srgb, var(--accent) 17%, transparent);
+}
+.quote-box p{margin:0;font-size:.94rem;}
+.quote-box strong{color:var(--accent2);}
+
+.btn{
+  background:linear-gradient(120deg,var(--accent2),var(--accent));
+  color:#14161f;border:none;padding:11px 22px;border-radius:99px;
+  font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.04em;
+  position:relative;overflow:hidden;margin-top:12px;
+  transition:transform .3s var(--ease), box-shadow .3s ease, filter .3s ease;
+  font-family:inherit;
+}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 26px -8px color-mix(in srgb, var(--accent2) 55%, transparent);filter:brightness(1.06);}
+.btn:active{transform:translateY(-1px) scale(.98);}
+.btn.ghost{
+  background:transparent;color:var(--text);border:1px solid var(--border);
+}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+#philosophy-output{
+  margin-top:16px;min-height:76px;font-style:italic;color:var(--name);
+  padding:16px 18px;border-radius:12px;
+  border:1px dashed var(--border);
+  background:color-mix(in srgb, var(--bg2) 55%, transparent);
+  font-size:.95rem;line-height:1.85;
+}
+#philosophy-output .tag{
+  display:inline-block;font-style:normal;font-size:.68rem;letter-spacing:.1em;
+  color:var(--bg);background:var(--accent);border-radius:99px;
+  padding:1px 9px;margin-right:8px;vertical-align:2px;
+}
+.dose{margin-top:10px;font-size:.78rem;color:var(--muted);letter-spacing:.06em;}
+
+/* ============================================================
+   名著翻转卡
+   ============================================================ */
+.book-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;}
+.flip{
+  perspective:1400px;height:220px;cursor:pointer;
+  transition:transform .5s var(--ease);
+}
+.flip:hover{transform:translateY(-6px);}
+.flip-inner{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:transform .8s cubic-bezier(.4,.2,.2,1);
+}
+.flip.flipped .flip-inner{transform:rotateY(180deg);}
+.face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:13px;padding:20px 18px;
+  border:1px solid var(--border);background:var(--card2);
+  display:flex;flex-direction:column;justify-content:center;
+  overflow:hidden;
+}
+.face.back{
+  transform:rotateY(180deg);
+  background:linear-gradient(150deg, color-mix(in srgb, var(--accent2) 16%, var(--card2)), var(--card2));
+  border-color:color-mix(in srgb, var(--accent2) 45%, transparent);
+}
+.face h3{
+  color:var(--name);font-size:1.06rem;margin-bottom:8px;letter-spacing:.02em;
+}
+.face .author{font-size:.76rem;color:var(--accent);letter-spacing:.1em;margin-bottom:12px;}
+.face .blurb{font-size:.86rem;color:var(--muted);line-height:1.75;}
+.face .stamp{
+  position:absolute;top:14px;right:14px;font-size:.66rem;letter-spacing:.1em;
+  color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:2px 9px;
+}
+.face .shadownum{
+  position:absolute;right:-6px;bottom:-24px;font-size:5.4rem;font-weight:800;
+  color:color-mix(in srgb, var(--accent2) 12%, transparent);line-height:1;pointer-events:none;
+}
+.face .tip{
+  position:absolute;bottom:13px;left:18px;font-size:.68rem;color:var(--muted);
+  letter-spacing:.1em;opacity:.8;
+}
+.face.back .verdict{
+  font-size:.92rem;color:var(--name);line-height:1.8;
+  border-left:3px solid var(--accent);padding-left:12px;
+}
+
+/* ============================================================
+   今日份的荒诞
+   ============================================================ */
+.absurd-out{
+  margin-top:16px;padding:20px;border-radius:13px;min-height:96px;
+  border:1px solid var(--border);
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent3) 16%, transparent), transparent 60%),
+    var(--card2);
+  display:flex;align-items:center;
+  font-size:1rem;line-height:1.9;
+}
+.absurd-out.glitch{animation:glitch .55s steps(2,end) 1;}
+@keyframes glitch{
+  0%{transform:translate(0);filter:none;}
+  20%{transform:translate(-3px,1px);filter:hue-rotate(30deg);}
+  40%{transform:translate(3px,-1px);filter:hue-rotate(-25deg);}
+  60%{transform:translate(-2px,-1px);}
+  80%{transform:translate(2px,1px);}
+  100%{transform:translate(0);filter:none;}
+}
+
+/* ============================================================
+   联系我
+   ============================================================ */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px;}
+.contact-card{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;transition:all .4s var(--ease);
+}
+.contact-card:hover{
+  border-color:var(--accent2);transform:translateY(-4px);
+  box-shadow:0 14px 30px -18px var(--shadow);
+}
+.contact-card .ico{
+  width:40px;height:40px;border-radius:11px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  background:color-mix(in srgb, var(--accent2) 15%, transparent);
+}
+.contact-card .info{flex:1;min-width:0;}
+.contact-card .info b{display:block;font-size:.74rem;color:var(--muted);letter-spacing:.12em;font-weight:500;}
+.contact-card .info span{
+  display:block;font-size:.92rem;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.copy{
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  border-radius:8px;font-size:.72rem;padding:5px 10px;cursor:pointer;
+  transition:all .3s ease;font-family:inherit;white-space:nowrap;
+}
+.copy:hover{color:var(--accent);border-color:var(--accent);}
+.copy.ok{color:var(--bg);background:var(--accent);border-color:var(--accent);}
+
+/* ============================================================
+   页脚 + 回到顶部 + 提示
+   ============================================================ */
+footer{
+  text-align:center;padding:70px 20px 60px;color:var(--muted);font-size:.85rem;
+  position:relative;
+}
+footer .fname{color:var(--name);letter-spacing:.1em;font-weight:600;}
+footer .fdiv{
+  width:56px;height:1px;margin:20px auto;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+footer .clock{font-variant-numeric:tabular-nums;letter-spacing:.14em;color:var(--accent);}
+
+#toTop{
+  position:fixed;right:22px;bottom:26px;z-index:1150;
+  width:44px;height:44px;border-radius:50%;cursor:pointer;
+  border:1px solid var(--border);background:color-mix(in srgb, var(--card) 90%, transparent);
+  color:var(--accent);font-size:1.05rem;line-height:1;
+  backdrop-filter:blur(10px);
+  opacity:0;visibility:hidden;transform:translateY(14px);
+  transition:all .45s var(--ease);
+}
+#toTop.show{opacity:1;visibility:visible;transform:none;}
+#toTop:hover{background:var(--accent);color:var(--bg);transform:translateY(-4px);box-shadow:0 12px 26px -10px var(--accent);}
+
+#toast{
+  position:fixed;left:50%;bottom:40px;z-index:1300;
+  transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:var(--accent);color:var(--bg);
+  padding:9px 20px;border-radius:99px;font-size:.84rem;font-weight:600;
+  transition:all .4s var(--ease);box-shadow:0 12px 30px -10px var(--accent);
+}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- 加载动画 -->
+<div id="loader">
+  <div class="loader-mark">沈志文</div>
+  <div class="loader-bar"><i></i></div>
+</div>
+
+<!-- 背景 -->
+<canvas id="stars"></canvas>
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="cursor-glow" id="glow"></div>
+<div class="progress" id="progress"></div>
+
+<!-- 导航 -->
+<nav id="nav">
+  <div class="nav-logo"><i></i>沈志文</div>
+  <div class="nav-links" id="navLinks">
+    <a href="#about">关于我</a>
+    <a href="#state">精神状态</a>
+    <a href="#timeline">哲学史</a>
+    <a href="#philosophy">精神解药</a>
+    <a href="#literature">名著</a>
+    <a href="#absurd">荒诞</a>
+    <a href="#contact">找到我</a>
+  </div>
+  <div class="themes" id="themes">
+    <button data-theme="tokyo" class="active" title="东京夜"></button>
+    <button data-theme="cyber" title="赛博紫"></button>
+    <button data-theme="forest" title="苔原绿"></button>
+    <button data-theme="daylight" title="白昼纸"></button>
+  </div>
+</nav>
+
+<!-- 头部 -->
+<header class="hero">
+  <div class="avatar-box">
+    <div class="avatar-halo"></div>
+    <div class="avatar-ring"></div>
+    <img src="avatar.jpg" alt="沈志文的头像" class="avatar" id="avatarImg">
+    <div class="avatar-fallback" id="avatarFallback">沈</div>
+  </div>
+
+  <h1>沈志文</h1>
+  <p class="subtitle"><span id="typed"></span><span class="caret"></span></p>
+
+  <div class="hero-tags">
+    <span>信息与计算科学</span>
+    <span>终身学习践行者</span>
+    <span>精神内耗资深玩家</span>
+    <span>深夜宇宙观察员</span>
+  </div>
+
+  <a href="#about" class="scroll-hint">
+    <span class="mouse"></span>
+    SCROLL
+  </a>
+</header>
+
+<main class="wrap">
+
+  <!-- 关于我 -->
+  <section id="about">
+    <h2>🪪 关于我<span class="no">正经版</span></h2>
+
+    <div class="stats reveal">
+      <div class="stat"><span class="num" data-count="137" data-suffix="+">0</span><span class="lbl">读过的书</span></div>
+      <div class="stat"><span class="num" data-count="1024" data-suffix="">0</span><span class="lbl">深夜思考宇宙</span></div>
+      <div class="stat"><span class="num" data-count="9999" data-suffix="+">0</span><span class="lbl">精神内耗次数</span></div>
+      <div class="stat"><span class="num" data-count="42" data-suffix="">0</span><span class="lbl">从入门到放弃</span></div>
+    </div>
+
+    <ul class="profile-list">
+      <li class="reveal"><strong>职业：</strong>信息与计算科学（研究如何用公式解释我为什么起不来床）</li>
+      <li class="reveal"><strong>状态：</strong>终身学习践行者，精神内耗资深玩家</li>
+      <li class="reveal"><strong>特长：</strong>精通从入门到放弃的各类技能，熟练运用苏格拉底式反问拒绝无理需求</li>
+      <li class="reveal"><strong>爱好：</strong>穿越哲学家的传记里找共鸣，阅读、编程、在深夜思考宇宙大爆炸</li>
+      <li class="reveal"><strong>座右铭：</strong>先做完，再做好；先活着，再深刻。</li>
+      <li class="reveal"><strong>联系方式：</strong>微信 18055683168 &nbsp;·&nbsp; QQ邮箱 3082171803@qq.com</li>
+    </ul>
+  </section>
+
+  <!-- 精神状态仪表盘 -->
+  <section id="state">
+    <h2>🌀 精神状态仪表盘<span class="no">实时监测</span></h2>
+    <p class="reveal">以下数据由本人在深夜自动采集，误差范围内不予修正。</p>
+
+    <div class="meters">
+      <div class="meter reveal" data-value="88">
+        <div class="top"><b>哲学杠精指数</b><em>88%</em></div>
+        <div class="track"><i></i></div>
+      </div>
+      <div class="meter reveal" data-value="76">
+        <div class="top"><b>深夜思辨能力</b><em>76%</em></div>
+        <div class="track"><i></i></div>
+      </div>
+      <div class="meter reveal" data-value="64">
+        <div class="top"><b>代码产出效率</b><em>64%</em></div>
+        <div class="track"><i></i></div>
+      </div>
+      <div class="meter reveal" data-value="99">
+        <div class="top"><b>精神内耗</b><em>99%</em></div>
+        <div class="track"><i></i></div>
+      </div>
+      <div class="meter reveal" data-value="23">
+        <div class="top"><b>社交电量</b><em>23%</em></div>
+        <div class="track"><i></i></div>
+      </div>
+      <div class="meter reveal" data-value="100">
+        <div class="top"><b>把石头推上山的决心</b><em>100%</em></div>
+        <div class="track"><i></i></div>
+      </div>
+    </div>
+
+    <p class="meter-note reveal">
+      注：所有指标的共同点是 —— 睡一觉之后都会暂时归零，然后第二天原地满血复活。
+    </p>
+  </section>
+
+  <!-- 哲学史时间轴 -->
+  <section id="timeline">
+    <h2>🏛️ 哲学史（发疯版）<span class="no">点击展开</span></h2>
+    <p class="reveal">别人看哲学史是为了寻找真理，我看哲学史是为了确认自己不是唯一疯掉的人。</p>
+
+    <div class="timeline" id="tl">
+      <div class="rail"><i id="railFill"></i></div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>苏格拉底</b><span>前470 — 前399</span></div>
+          <div class="say">“我只知道我一无所知。”</div>
+          <div class="trans">翻译：我啥也不懂，但我就是要杠到底 —— 顺便把雅典的年轻人也带跑偏了。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>柏拉图</b><span>前427 — 前347</span></div>
+          <div class="say">“洞穴里的人，把墙上的影子当成了真相。”</div>
+          <div class="trans">翻译：你以为你在刷手机，其实是手机在刷你。出去看看太阳吧，虽然会刺眼。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>亚里士多德</b><span>前384 — 前322</span></div>
+          <div class="say">“吾爱吾师，吾更爱真理。”</div>
+          <div class="trans">翻译：老师，对不住了，这锅您自己背。顺便我还想给万物分个类，包括您的错误。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>笛卡尔</b><span>1596 — 1650</span></div>
+          <div class="say">“我思故我在。”</div>
+          <div class="trans">翻译：只要我还在怀疑人生，我就还没死透。这是哲学史上最硬核的自我安慰。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>康德</b><span>1724 — 1804</span></div>
+          <div class="say">“有两样东西，我越是思考，就越感到敬畏：头顶的星空与心中的道德律。”</div>
+          <div class="trans">翻译：一个负责让我失眠，一个负责让我在没人看见的时候也不敢乱来。而且他这辈子几乎没出过城。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>尼采</b><span>1844 — 1900</span></div>
+          <div class="say">“上帝死了。”</div>
+          <div class="trans">翻译：生活失去了意义，但别慌，我们还有房贷要还。以及：那些杀不死你的，会让你更想请个假。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>加缪</b><span>1913 — 1960</span></div>
+          <div class="say">“我们必须想象西西弗是幸福的。”</div>
+          <div class="trans">翻译：既然石头总要滚下来，不如摆个漂亮的姿势推上去，顺便把它当成健身。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+
+      <div class="tl-item reveal">
+        <div class="tl-card">
+          <div class="tl-head"><b>萨特</b><span>1905 — 1980</span></div>
+          <div class="say">“存在先于本质。”</div>
+          <div class="trans">翻译：你先得把自己活出来，再去定义自己是个什么玩意儿。自由是诅咒，也是唯一的出路。</div>
+          <div class="hintline">▾ 点击查看暴论翻译</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 精神解药 -->
+  <section id="philosophy">
+    <h2>💊 今日精神解药<span class="no">随症抓药</span></h2>
+    <p class="reveal">当你觉得人生是一场大型行为艺术时，请服用以下任意一剂。</p>
+
+    <div class="quote-box reveal">
+      <p><strong>苏格拉底：</strong>“我只知道我一无所知。” —— 翻译：我啥也不懂，但我就是要杠到底。</p>
+    </div>
+    <div class="quote-box reveal">
+      <p><strong>尼采：</strong>“上帝死了。” —— 翻译：生活失去了意义，但别慌，我们还有房贷要还。</p>
+    </div>
+    <div class="quote-box reveal">
+      <p><strong>加缪：</strong>“我们必须想象西西弗是幸福的。” —— 翻译：既然石头总要滚下来，不如摆个漂亮的姿势推上去。</p>
+    </div>
+
+    <div class="btn-row reveal">
+      <button class="btn" id="btnQuote">点我获取今日精神解药</button>
+      <button class="btn ghost" id="btnClear">清空桌面</button>
+    </div>
+
+    <p id="philosophy-output"></p>
+    <p class="dose" id="dose">今日已服用 0 剂。</p>
+  </section>
+
+  <!-- 名著 -->
+  <section id="literature">
+    <h2>📚 名著（深度解读）<span class="no">点击翻面</span></h2>
+    <p class="reveal">正面是体面，背面是真心话。</p>
+
+    <div class="book-grid">
+      <div class="flip reveal">
+        <div class="flip-inner">
+          <div class="face">
+            <span class="stamp">魔幻</span>
+            <div class="shadownum">100</div>
+            <h3>《百年孤独》</h3>
+            <div class="author">加西亚·马尔克斯</div>
+            <p class="blurb">魔幻现实主义防脱发指南。讲述一个家族如何在重复的名字和命运中，把日子过得乱七八糟却又莫名迷人。</p>
+            <div class="tip">▸ 点击翻面</div>
+          </div>
+          <div class="face back">
+            <div class="verdict">读完的感受：原来热闹可以这么寂寞。所有人都在说话，没有一个人被听清 —— 挺像我家族群的。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip reveal">
+        <div class="flip-inner">
+          <div class="face">
+            <span class="stamp">冷淡</span>
+            <div class="shadownum">01</div>
+            <h3>《局外人》</h3>
+            <div class="author">阿尔贝·加缪</div>
+            <p class="blurb">如何在社交场合优雅地格格不入。主角告诉我们：只要你不尴尬，尴尬的就是这个世界。</p>
+            <div class="tip">▸ 点击翻面</div>
+          </div>
+          <div class="face back">
+            <div class="verdict">最爽的一句其实是：他拒绝表演悲伤。而我们大多数人，一天要表演八次。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip reveal">
+        <div class="flip-inner">
+          <div class="face">
+            <span class="stamp">拉扯</span>
+            <div class="shadownum">∞</div>
+            <h3>《卡拉马佐夫兄弟》</h3>
+            <div class="author">陀思妥耶夫斯基</div>
+            <p class="blurb">一场家庭伦理剧的极致拉扯。在探讨上帝是否存在的同时，顺便教你如何在家庭聚会上保持沉默。</p>
+            <div class="tip">▸ 点击翻面</div>
+          </div>
+          <div class="face back">
+            <div class="verdict">如果要选一个角色认领：我大概是那个在所有人吵架时默默去倒水的弟弟。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip reveal">
+        <div class="flip-inner">
+          <div class="face">
+            <span class="stamp">躺平</span>
+            <div class="shadownum">道</div>
+            <h3>《庄子》</h3>
+            <div class="author">庄周</div>
+            <p class="blurb">古代最强“躺平”哲学。万物皆齐，逍遥游世，主打一个“你卷任你卷，清风拂山岗”。</p>
+            <div class="tip">▸ 点击翻面</div>
+          </div>
+          <div class="face back">
+            <div class="verdict">庄子不是不努力，他只是不和你比。这一手要练好，得先卸载几个 App。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip reveal">
+        <div class="flip-inner">
+          <div class="face">
+            <span class="stamp">重复</span>
+            <div class="shadownum">S</div>
+            <h3>《西西弗神话》</h3>
+            <div class="author">阿尔贝·加缪</div>
+            <p class="blurb">给所有早起通勤的人的一封情书。石头滚下来，那就再推一次，反正宇宙也没在看着。</p>
+            <div class="tip">▸ 点击翻面</div>
+          </div>
+          <div class="face back">
+            <div class="verdict">荒诞不是绝望，荒诞是清醒。清醒之后还能笑着上班，才叫本事。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip reveal">
+        <div class="flip-inner">
+          <div class="face">
+            <span class="stamp">启蒙</span>
+            <div class="shadownum">?</div>
+            <h3>《苏菲的世界》</h3>
+            <div class="author">乔斯坦·贾德</div>
+            <p class="blurb">哲学史的快递员。把两千五百年打包成一个悬念，让你在想着“我是不是也被人写在书里”的同时读完。</p>
+            <div class="tip">▸ 点击翻面</div>
+          </div>
+          <div class="face back">
+            <div class="verdict">我的哲学启蒙，也是我精神内耗的官方起点。感谢它，也恨它。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 今日份的荒诞 -->
+  <section id="absurd">
+    <h2>🧪 今日份的荒诞<span class="no">随机投放</span></h2>
+    <p class="reveal">按下按钮，宇宙会随机回你一句话。它不一定有用，但一定很真诚。</p>
+    <div class="btn-row reveal">
+      <button class="btn" id="btnAbsurd">生成一句荒诞</button>
+    </div>
+    <div class="absurd-out" id="absurdOut">点击上方按钮，领取今天份的荒诞。</div>
+  </section>
+
+  <!-- 联系我 -->
+  <section id="contact">
+    <h2>📮 找到我<span class="no">欢迎打扰</span></h2>
+    <p class="reveal">聊哲学、聊代码、聊深夜睡不着都可以，但请先想好开场白（我会用苏格拉底式反问回你）。</p>
+
+    <div class="contact-grid">
+      <div class="contact-card reveal">
+        <div class="ico">💬</div>
+        <div class="info"><b>微信</b><span>18055683168</span></div>
+        <button class="copy" data-copy="18055683168">复制</button>
+      </div>
+      <div class="contact-card reveal">
+        <div class="ico">✉️</div>
+        <div class="info"><b>QQ 邮箱</b><span>3082171803@qq.com</span></div>
+        <button class="copy" data-copy="3082171803@qq.com">复制</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="fname">沈志文 · 精神避难所</div>
+  <div class="fdiv"></div>
+  <p>© 2026 沈志文 · 已阅，批注：人生如戏，全靠演技。</p>
+  <p style="margin-top:10px;">现在是 <span class="clock" id="clock">--:--:--</span> &nbsp;·&nbsp; 你在这儿已经待了 <span class="clock" id="stay">0</span> 秒</p>
+</footer>
+
+<button id="toTop" title="回到顶部">↑</button>
+<div id="toast">已复制</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ==========================================================
+     1. 加载动画
+     ========================================================== */
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var l = document.getElementById('loader');
+      if (l) l.classList.add('done');
+    }, reduceMotion ? 0 : 1500);
+  });
+  // 兜底：万一 load 事件迟迟不来
+  setTimeout(function () {
+    var l = document.getElementById('loader');
+    if (l) l.classList.add('done');
+  }, 3600);
+
+  /* ==========================================================
+     2. 头像加载失败兜底
+     ========================================================== */
+  var av = document.getElementById('avatarImg');
+  if (av) {
+    av.addEventListener('error', function () {
+      av.style.display = 'none';
+      var fb = document.getElementById('avatarFallback');
+      if (fb) fb.style.display = 'flex';
+    });
+  }
+
+  /* ==========================================================
+     3. 打字机效果
+     ========================================================== */
+  var text = '在人生的泥石流中，仰望远方的康德';
+  var typed = document.getElementById('typed');
+  if (typed) {
+    if (reduceMotion) {
+      typed.textContent = text;
+    } else {
+      var i = 0;
+      setTimeout(function tick() {
+        typed.textContent = text.slice(0, i++);
+        if (i <= text.length) setTimeout(tick, 88);
+      }, 1700);
+    }
+  }
+
+  /* ==========================================================
+     4. 粒子星空背景
+     ========================================================== */
+  (function starfield() {
+    if (reduceMotion) return;
+    var cvs = document.getElementById('stars');
+    if (!cvs || !cvs.getContext) return;
+    var ctx = cvs.getContext('2d');
+    var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var dots = [];
+    var mouse = { x: -9999, y: -9999 };
+    var rgb = [192, 202, 245];
+
+    function readColor() {
+      var v = getComputedStyle(document.documentElement).getPropertyValue('--star').trim();
+      var p = v.split(',').map(function (n) { return parseInt(n, 10) || 0; });
+      if (p.length === 3) rgb = p;
+    }
+
+    function resize() {
+      W = window.innerWidth; H = window.innerHeight;
+      cvs.width = W * dpr; cvs.height = H * dpr;
+      cvs.style.width = W + 'px'; cvs.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var count = Math.min(120, Math.round(W * H / 16000));
+      dots = [];
+      for (var k = 0; k < count; k++) {
+        dots.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.22,
+          vy: (Math.random() - 0.5) * 0.22,
+          r: Math.random() * 1.7 + 0.5,
+          a: Math.random() * 0.5 + 0.18,
+          ph: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    var LINK = 132;
+
+    function frame(t) {
+      ctx.clearRect(0, 0, W, H);
+      for (var k = 0; k < dots.length; k++) {
+        var d = dots[k];
+        d.x += d.vx; d.y += d.vy;
+        if (d.x < -20) d.x = W + 20; if (d.x > W + 20) d.x = -20;
+        if (d.y < -20) d.y = H + 20; if (d.y > H + 20) d.y = -20;
+
+        // 鼠标轻微排斥
+        var dx = d.x - mouse.x, dy = d.y - mouse.y;
+        var dist2 = dx * dx + dy * dy;
+        if (dist2 < 13000) {
+          var f = (13000 - dist2) / 13000;
+          d.x += (dx / (Math.sqrt(dist2) + 0.01)) * f * 1.5;
+          d.y += (dy / (Math.sqrt(dist2) + 0.01)) * f * 1.5;
+        }
+
+        var tw = d.a * (0.65 + 0.35 * Math.sin(t / 900 + d.ph));
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + tw.toFixed(3) + ')';
+        ctx.fill();
+
+        for (var j = k + 1; j < dots.length; j++) {
+          var o = dots[j];
+          var ax = d.x - o.x, ay = d.y - o.y;
+          var dd = ax * ax + ay * ay;
+          if (dd < LINK * LINK) {
+            var al = (1 - Math.sqrt(dd) / LINK) * 0.14;
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y); ctx.lineTo(o.x, o.y);
+            ctx.strokeStyle = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + al.toFixed(3) + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', function (e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseout', function () { mouse.x = mouse.y = -9999; });
+
+    readColor();
+    resize();
+    requestAnimationFrame(frame);
+
+    // 主题切换时刷新粒子颜色
+    window.__refreshStarColor = readColor;
+  })();
+
+  /* ==========================================================
+     5. 鼠标光晕
+     ========================================================== */
+  (function glow() {
+    if (reduceMotion || window.innerWidth < 900) return;
+    var g = document.getElementById('glow');
+    if (!g) return;
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 2, cx = tx, cy = ty;
+    window.addEventListener('mousemove', function (e) {
+      tx = e.clientX; ty = e.clientY; g.style.opacity = '1';
+    });
+    window.addEventListener('mouseout', function () { g.style.opacity = '0'; });
+    (function loop() {
+      cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
+      g.style.transform = 'translate(' + cx + 'px,' + cy + 'px) translate(-50%,-50%)';
+      requestAnimationFrame(loop);
+    })();
+  })();
+
+  /* ==========================================================
+     6. 导航 / 进度条 / 回到顶部
+     ========================================================== */
+  var nav = document.getElementById('nav');
+  var progress = document.getElementById('progress');
+  var toTop = document.getElementById('toTop');
+
+  function onScroll() {
+    var y = window.pageYOffset || document.documentElement.scrollTop;
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (y / h) * 100 : 0;
+    if (progress) progress.style.width = p + '%';
+    if (nav) nav.classList.toggle('scrolled', y > 24);
+    if (toTop) toTop.classList.toggle('show', y > 420);
+    railUpdate();
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  if (toTop) {
+    toTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+
+  /* 导航高亮 */
+  (function navActive() {
+    var links = Array.prototype.slice.call(document.querySelectorAll('#navLinks a'));
+    var secs = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+    if (!secs.length || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (a) {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id);
+        });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    secs.forEach(function (s) { io.observe(s); });
+  })();
+
+  /* ==========================================================
+     7. 滚动显现 + 计数器 + 进度条动画 + 时间轴
+     ========================================================== */
+  var revealEls = document.querySelectorAll('.reveal');
+
+  if (!('IntersectionObserver' in window)) {
+    Array.prototype.forEach.call(revealEls, function (el) { el.classList.add('in'); });
+  } else {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        // 同组错位出现
+        var siblings = Array.prototype.slice.call(el.parentNode.children).filter(function (n) {
+          return n.classList && n.classList.contains('reveal');
+        });
+        var idx = siblings.indexOf(el);
+        el.style.transitionDelay = Math.min(idx, 7) * 70 + 'ms';
+        el.classList.add('in');
+        io2.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+    Array.prototype.forEach.call(revealEls, function (el) { io2.observe(el); });
+  }
+
+  /* 数字滚动 */
+  function animateCount(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+    var suffix = el.getAttribute('data-suffix') || '';
+    if (reduceMotion) { el.textContent = target + suffix; return; }
+    var dur = 1500, start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var k = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* 进度条 */
+  function animateMeter(m) {
+    var v = Math.max(0, Math.min(100, parseInt(m.getAttribute('data-value'), 10) || 0));
+    var bar = m.querySelector('.track i');
+    if (bar) setTimeout(function () { bar.style.width = v + '%'; }, 120);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io3 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var t = en.target;
+        if (t.classList.contains('stat')) { var n = t.querySelector('.num'); if (n) animateCount(n); }
+        if (t.classList.contains('meter')) animateMeter(t);
+        io3.unobserve(t);
+      });
+    }, { threshold: 0.35 });
+    Array.prototype.forEach.call(document.querySelectorAll('.stat'), function (s) { io3.observe(s); });
+    Array.prototype.forEach.call(document.querySelectorAll('.meter'), function (m) { io3.observe(m); });
+  } else {
+    Array.prototype.forEach.call(document.querySelectorAll('.stat .num'), animateCount);
+    Array.prototype.forEach.call(document.querySelectorAll('.meter'), animateMeter);
+  }
+
+  /* 时间轴：卡片展开 + 竖线随滚动填充 */
+  var tl = document.getElementById('tl');
+  var railFill = document.getElementById('railFill');
+
+  function railUpdate() {
+    if (!tl || !railFill) return;
+    var r = tl.getBoundingClientRect();
+    var vh = window.innerHeight;
+    var passed = (vh * 0.72) - r.top;
+    var ratio = Math.max(0, Math.min(1, passed / r.height));
+    railFill.style.height = (ratio * 100) + '%';
+  }
+
+  if (tl) {
+    tl.addEventListener('click', function (e) {
+      var card = e.target.closest ? e.target.closest('.tl-card') : null;
+      if (!card) return;
+      var wasOpen = card.classList.contains('open');
+      Array.prototype.forEach.call(tl.querySelectorAll('.tl-card.open'), function (c) {
+        c.classList.remove('open');
+      });
+      if (!wasOpen) card.classList.add('open');
+    });
+  }
+
+  /* ==========================================================
+     8. 精神解药生成器
+     ========================================================== */
+  var quotes = [
+    { t: '人生的意义在于承担人生无意义的勇气。', a: '加缪', tag: '荒诞' },
+    { t: '存在先于本质。翻译：你先得把自己活出来，再去定义自己是个什么玩意儿。', a: '萨特', tag: '自由' },
+    { t: '人是万物的尺度。翻译：我觉得行，它就行。', a: '普罗泰戈拉', tag: '相对' },
+    { t: '未经审视的人生是不值得过的。翻译：不去反思，你就是在白活。', a: '苏格拉底', tag: '反思' },
+    { t: '凡不能毁灭我的，必使我更强大。翻译：只要没死，就往死里卷。', a: '尼采', tag: '超人' },
+    { t: '我们都在阴沟里，但仍有人仰望星空。翻译：房租照交，但姿态要帅。', a: '王尔德', tag: '浪漫' },
+    { t: '人生而自由，却无往不在枷锁之中。翻译：自由是有的，就是得排队。', a: '卢梭', tag: '困境' },
+    { t: '重要的不是治愈，而是带着病痛活下去。翻译：接受自己是个半成品。', a: '加缪', tag: '和解' },
+    { t: '知之为知之，不知为不知，是知也。翻译：承认自己不会，是性价比最高的聪明。', a: '孔子', tag: '诚实' },
+    { t: '天地与我并生，万物与我为一。翻译：搞不清意义就先睡一觉，醒来再搞不清。', a: '庄子', tag: '齐物' },
+    { t: '人是被判定为自由的。翻译：没人逼你，这才是最可怕的。', a: '萨特', tag: '责任' },
+    { t: '向外看的人在做梦，向内看的人才清醒。翻译：别刷了，看看自己。', a: '荣格', tag: '内省' }
+  ];
+
+  var out = document.getElementById('philosophy-output');
+  var doseEl = document.getElementById('dose');
+  var doseCount = 0;
+  var typingTimer = null;
+
+  function typeInto(el, html) {
+    clearTimeout(typingTimer);
+    el.innerHTML = '';
+    if (reduceMotion) { el.innerHTML = html; return; }
+    // 逐字显示纯文本部分（保留标签结构：先放标签再打字）
+    var m = html.match(/^<span class="tag">([\s\S]*?)<\/span>([\s\S]*)$/);
+    var prefix = '', body = html;
+    if (m) { prefix = '<span class="tag">' + m[1] + '</span>'; body = m[2]; }
+    el.innerHTML = prefix + '<span id="__tw"></span>';
+    var tw = el.querySelector('#__tw');
+    var i = 0;
+    (function tick() {
+      tw.textContent = body.slice(0, i++);
+      if (i <= body.length) typingTimer = setTimeout(tick, 32);
+    })();
+  }
+
+  if (out) {
+    document.getElementById('btnQuote').addEventListener('click', function () {
+      var q = quotes[Math.floor(Math.random() * quotes.length)];
+      var html = '<span class="tag">' + q.tag + '</span>“' + q.t + '” —— ' + q.a;
+      typeInto(out, html);
+      doseCount++;
+      doseEl.textContent = '今日已服用 ' + doseCount + ' 剂。副作用：可能想立刻买书。';
+    });
+
+    document.getElementById('btnClear').addEventListener('click', function () {
+      clearTimeout(typingTimer);
+      out.innerHTML = '';
+      doseEl.textContent = '桌面已清空，但人生的困惑还在。今日已服用 ' + doseCount + ' 剂。';
+    });
+  }
+
+  /* ==========================================================
+     9. 名著卡片翻面
+     ========================================================== */
+  Array.prototype.forEach.call(document.querySelectorAll('.flip'), function (card) {
+    card.addEventListener('click', function () { card.classList.toggle('flipped'); });
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.classList.toggle('flipped');
+      }
+    });
+  });
+
+  /* ==========================================================
+     10. 今日份的荒诞
+     ========================================================== */
+  var absurdLines = [
+    '宇宙没给你说明书，但它给了你一整个可以乱涂乱画的空白页。',
+    '你今天最大的成就，可能只是让地球多了 0.0000001 克的二氧化碳。恭喜，你存在过。',
+    '熵增不可逆，所以乱是常态，整洁才是需要解释的奇迹。你的桌面可以理直气壮。',
+    '据说每个人都是星辰的碎片。那么你今天不想起床，大概是引力还不够。',
+    '时间不会治愈一切，但会让一切变成"那年"。',
+    '如果人生是一场游戏，那它一定没做过新手引导。',
+    '你不必成为更好的人，你只需要成为没那么纠结的人。',
+    '所有的"以后再说"，最后都变成了"当年如果"。',
+    '你今天感到的迷茫，两千五百年前也有人感到过，而且他还把它写成了书。',
+    '别怕走错路，地球是圆的，绕一圈还能回来（手续费另算）。'
+  ];
+  var aOut = document.getElementById('absurdOut');
+  var btnAbsurd = document.getElementById('btnAbsurd');
+  var lastIdx = -1;
+
+  if (btnAbsurd && aOut) {
+    btnAbsurd.addEventListener('click', function () {
+      var idx;
+      do { idx = Math.floor(Math.random() * absurdLines.length); }
+      while (absurdLines.length > 1 && idx === lastIdx);
+      lastIdx = idx;
+      aOut.textContent = absurdLines[idx];
+      aOut.classList.remove('glitch');
+      void aOut.offsetWidth;
+      aOut.classList.add('glitch');
+    });
+  }
+
+  /* ==========================================================
+     11. 复制 & 提示
+     ========================================================== */
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 1800);
+  }
+
+  function copyText(str, cb) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(str).then(cb, function () { fallback(); });
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); cb(); } catch (err) { cb(); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.copy'), function (b) {
+    b.addEventListener('click', function () {
+      var raw = b.getAttribute('data-copy');
+      copyText(raw, function () {
+        var old = b.textContent;
+        b.textContent = '已复制';
+        b.classList.add('ok');
+        showToast('已复制：' + raw);
+        setTimeout(function () { b.textContent = old; b.classList.remove('ok'); }, 1600);
+      });
+    });
+  });
+
+  /* ==========================================================
+     12. 主题切换
+     ========================================================== */
+  var themeBtns = document.querySelectorAll('#themes button');
+  function setTheme(name) {
+    document.documentElement.setAttribute('data-theme', name);
+    Array.prototype.forEach.call(themeBtns, function (b) {
+      b.classList.toggle('active', b.getAttribute('data-theme') === name);
+    });
+    try { localStorage.setItem('szw-theme', name); } catch (e) {}
+    if (window.__refreshStarColor) window.__refreshStarColor();
+  }
+  Array.prototype.forEach.call(themeBtns, function (b) {
+    b.addEventListener('click', function () { setTheme(b.getAttribute('data-theme')); });
+  });
+  try {
+    var saved = localStorage.getItem('szw-theme');
+    if (saved) setTheme(saved);
+  } catch (e) {}
+
+  /* ==========================================================
+     13. 页脚时钟 & 停留时长
+     ========================================================== */
+  var clock = document.getElementById('clock');
+  var stay = document.getElementById('stay');
+  var t0 = Date.now();
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function tickClock() {
+    var d = new Date();
+    if (clock) clock.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    if (stay) stay.textContent = Math.floor((Date.now() - t0) / 1000);
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* 首屏刷新一次滚动状态 */
+  onScroll();
+
+})();
+</script>
+</body>
+</html>
